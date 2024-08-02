@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String    @id @default(uuid())
+  name     String?
+  email    String    @unique
+  password String?
+  income   Income[]
+  expense  Expense[]
+}
+
+enum type {
+  one_time
+  recurring
+}
+
+model Income {
+  id         String      @id @default(uuid())
+  name       String
+  amount     Int
+  type       type
+  createdAt  DateTime    @default(now())
+  user       User?       @relation(fields: [userId], references: [id])
+  userId     String?
+  new_income NewIncome[]
+}
+
+model NewIncome {
+  id        String   @id @default(uuid())
+  amount    Int
+  createdAt DateTime @default(now())
+  income    Income?  @relation(fields: [incomeId], references: [id])
+  incomeId  String?
+}
+
+model Expense {
+  id          String       @id @default(uuid())
+  name        String
+  amount      Int
+  type        type
+  createdAt   DateTime     @default(now())
+  user        User?        @relation(fields: [userId], references: [id])
+  userId      String?
+  new_expense NewExpense[]
+}
+
+model NewExpense {
+  id        String   @id @default(uuid())
+  amount    Int
+  createdAt DateTime @default(now())
+  expense   Expense? @relation(fields: [expenseId], references: [id])
+  expenseId String?
+}
