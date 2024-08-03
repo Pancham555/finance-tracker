@@ -19,7 +19,7 @@ export default function Dashboard() {
       <div className="flex-1 space-y-4 px-4 md:px-8 pt-6">
         <div className="flex flex-wrap items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-          <div className="flex items-center space-x-2 justify-between w-full md:w-auto">
+          <div className="flex flex-wrap gap-2 items-center  justify-between w-full md:w-auto">
             <DatePickerWithRange />
             <Button size="sm">
               <Download className="mr-2 h-4 w-4" />
@@ -32,7 +32,7 @@ export default function Dashboard() {
         defaultValue="overview"
         className="space-y-4 px-4 md:px-8 py-4 md:py-8"
       >
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="analytics" disabled>
             Analytics
@@ -40,9 +40,9 @@ export default function Dashboard() {
           <TabsTrigger value="reports" disabled>
             Reports
           </TabsTrigger>
-          <TabsTrigger value="notifications" disabled>
+          {/* <TabsTrigger value="notifications" disabled>
             Notifications
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <main className="flex flex-1 flex-col gap-4 md:gap-4">

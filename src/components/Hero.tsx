@@ -79,9 +79,9 @@ export default function HeroFormSignUpForm() {
             {/* End Col */}
             <div>
               {/* Form */}
+
               <form>
                 <div className="lg:max-w-lg lg:mx-auto lg:me-0 ms-auto">
-                  {/* Card */}
                   <Card>
                     <CardHeader className="text-center">
                       <h2 className="text-2xl font-semibold leading-none tracking-tight">
@@ -133,7 +133,6 @@ export default function HeroFormSignUpForm() {
                         </Separator>
                       </div>
                       <div className="mt-5">
-                        {/* Grid */}
                         <div className="grid grid-cols-2 gap-4">
                           <Input placeholder="First name" />
                           <Input placeholder="Last name" />
@@ -157,11 +156,9 @@ export default function HeroFormSignUpForm() {
                             Get started
                           </Button>
                         </div>
-                        {/* Grid End */}
                       </div>
                     </CardContent>
                   </Card>
-                  {/* End Card */}
                 </div>
               </form>
               {/* End Form */}

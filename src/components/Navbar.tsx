@@ -1,21 +1,17 @@
+"use client";
 import Link from "next/link";
-// import {
-//   NavigationMenuItem,
-//   NavigationMenuTrigger,
-//   NavigationMenuContent,
-//   NavigationMenuLink,
-//   NavigationMenu,
-//   NavigationMenuList,
-// } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import React from "react";
 import { ModeToggle } from "./theme-button";
-import { BotMessageSquare } from "lucide-react";
+import { SignedOut, SignInButton, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
   return (
-    <header className="fixed top-0 z-50 w-full">
+    <header className="fixed top-0 z-50 w-full bg-gradient-to-bl from-primary-foreground via-primary-foreground to-background">
       <div className="container h-16 items-center flex justify-between px-4 md:px-6">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2" prefetch={false}>
@@ -30,61 +26,7 @@ export default function Navbar() {
             >
               About
             </Link>
-            {/* <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent">
-                  Documentation
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid w-[400px] p-2">
-                    <NavigationMenuLink asChild>
-                      <Link
-                        href="#"
-                        className="group grid h-auto w-full items-center justify-start gap-1 rounded-md bg-background p-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
-                        prefetch={false}
-                      >
-                        <div className="text-sm font-medium leading-none group-hover:underline">
-                          Getting Started
-                        </div>
-                        <div className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Learn how to set up and use our product.
-                        </div>
-                      </Link>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                      <Link
-                        href="#"
-                        className="group grid h-auto w-full items-center justify-start gap-1 rounded-md bg-background p-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
-                        prefetch={false}
-                      >
-                        <div className="text-sm font-medium leading-none group-hover:underline">
-                          API Reference
-                        </div>
-                        <div className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Explore our API documentation.
-                        </div>
-                      </Link>
-                    </NavigationMenuLink>
-                    <NavigationMenuLink asChild>
-                      <Link
-                        href="#"
-                        className="group grid h-auto w-full items-center justify-start gap-1 rounded-md bg-background p-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
-                        prefetch={false}
-                      >
-                        <div className="text-sm font-medium leading-none group-hover:underline">
-                          Guides
-                        </div>
-                        <div className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Learn best practices and how-to guides.
-                        </div>
-                      </Link>
-                    </NavigationMenuLink>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu> */}
+
             <Link
               href={`mailto:${process.env.MAIL}`}
               className="text-sm font-medium hover:text-primary transition-colors"
@@ -96,7 +38,18 @@ export default function Navbar() {
         </div>
         <div className="hidden lg:inline-flex gap-5 justify-end">
           <ModeToggle />
-          <Button>Get Started</Button>
+          {isLoaded && isSignedIn && (
+            <Button variant="outline" onClick={() => router.push("/dashboard")}>
+              Dashboard
+            </Button>
+          )}
+          {isLoaded && !isSignedIn && (
+            <Button>
+              <SignedOut>
+                <SignInButton />
+              </SignedOut>
+            </Button>
+          )}
         </div>
         <Sheet>
           <SheetTrigger asChild>
@@ -118,51 +71,6 @@ export default function Navbar() {
               <ModeToggle />
             </div>
             <nav className="grid gap-4 px-4 py-6">
-              {/* <Link
-                href="#"
-                className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-                prefetch={false}
-              >
-                <HomeIcon className="h-5 w-5" />
-                Home
-              </Link>
-              <Link
-                href="/playground"
-                className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-                prefetch={false}
-              >
-                <BotMessageSquare className="h-5 w-5" />
-                Playground
-              </Link>
-              <div className="grid gap-4">
-                <div className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
-                  <InfoIcon className="h-5 w-5" />
-                  Documentation
-                </div>
-                <div className="grid gap-2 pl-6">
-                  <Link
-                    href="#"
-                    className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-                    prefetch={false}
-                  >
-                    Getting Started
-                  </Link>
-                  <Link
-                    href="#"
-                    className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-                    prefetch={false}
-                  >
-                    API Reference
-                  </Link>
-                  <Link
-                    href="#"
-                    className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
-                    prefetch={false}
-                  >
-                    Guides
-                  </Link>
-                </div>
-              </div> */}
               <Link
                 href="/about"
                 className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"

@@ -14,12 +14,12 @@ datasource db {
 }
 
 model User {
-  id       String    @id @default(uuid())
-  name     String?
-  email    String    @unique
-  password String?
-  income   Income[]
-  expense  Expense[]
+  id      String    @id @default(uuid())
+  clerkId String    @unique
+  name    String?
+  email   String    @unique
+  income  Income[]
+  expense Expense[]
 }
 
 enum type {
