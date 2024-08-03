@@ -17,7 +17,7 @@ export default function DashboardLayout({
   const dashboardRoutes = [
     {
       link: "/dashboard",
-      name: "Overview",
+      name: "Dashboard",
     },
     {
       link: "/dashboard/income",
@@ -84,33 +84,21 @@ export default function DashboardLayout({
                   <Package2 className="h-6 w-6" />
                   <span className="sr-only">Acme Inc</span>
                 </Link>
-                <Link href="#" className="hover:text-foreground">
-                  Dashboard
-                </Link>
-                <Link
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Orders
-                </Link>
-                <Link
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Products
-                </Link>
-                <Link
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Customers
-                </Link>
-                <Link
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Analytics
-                </Link>
+                {dashboardRoutes.map((data, i) => {
+                  return (
+                    <Link
+                      key={i}
+                      href={data.link}
+                      className={`hover:text-foreground ${
+                        data.link === pathname
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {data.name}
+                    </Link>
+                  );
+                })}
               </nav>
             </SheetContent>
           </Sheet>
