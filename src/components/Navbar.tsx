@@ -11,7 +11,7 @@ export default function Navbar() {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
   return (
-    <header className="fixed top-0 z-50 w-full bg-gradient-to-bl from-primary-foreground via-primary-foreground to-background">
+    <header className="fixed top-0 z-50 w-full bg-white dark:bg-slate-950">
       <div className="container h-16 items-center flex justify-between px-4 md:px-6">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2" prefetch={false}>
@@ -71,6 +71,23 @@ export default function Navbar() {
               <ModeToggle />
             </div>
             <nav className="grid gap-4 px-4 py-6">
+              <div className="">
+                {isLoaded && isSignedIn && (
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push("/dashboard")}
+                  >
+                    Dashboard
+                  </Button>
+                )}
+                {isLoaded && !isSignedIn && (
+                  <Button>
+                    <SignedOut>
+                      <SignInButton />
+                    </SignedOut>
+                  </Button>
+                )}
+              </div>
               <Link
                 href="/about"
                 className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors"
