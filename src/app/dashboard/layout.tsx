@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { usePathname } from "next/navigation";
 import { ModeToggle } from "@/components/theme-button";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLayout({
   children,
@@ -36,6 +37,7 @@ export default function DashboardLayout({
       name: "Settings",
     },
   ];
+  const { isLoaded } = useUser();
   return (
     <>
       <div className="flex min-h-screen w-full flex-col">
@@ -114,7 +116,13 @@ export default function DashboardLayout({
               </div>
             </form>
             <ModeToggle />
-            <UserButton />
+            {!isLoaded ? (
+              <Skeleton className="w-10 h-10 rounded-full" />
+            ) : (
+              <UserButton
+                appearance={{ elements: { userButtonAvatarBox: "w-10 h-10" } }}
+              />
+            )}
           </div>
         </header>
         {children}

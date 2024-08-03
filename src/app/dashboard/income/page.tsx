@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -56,6 +56,10 @@ import {
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import axios from "axios";
+import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   name: z
@@ -71,25 +75,39 @@ const formSchema = z.object({
     message: "Amount cannot be this less.",
   }),
   type: z.enum(["one_time", "recurring", ""]),
-  dateReceived: z
+  createdAt: z
     .date({
       required_error: "Please enter the date, you received the amount.",
     })
     .nullable(),
 });
 
+const updateFormSchema = z.object({
+  name: z
+    .string()
+    .min(2, {
+      message: "name must be at least 2 characters.",
+    })
+    .max(25, {
+      message: "please a shorter name.",
+    }),
+});
+
+interface ArrProps {
+  id: string;
+  name: string;
+  amount: number;
+  type: "one_time" | "recurring";
+  createdAt: Date;
+}
+
 export default function Income() {
+  const { user } = useUser();
   const [dialogTrigger, setDialogTrigger] = useState(false);
-  const [arr, setArr] = useState<z.infer<typeof formSchema>[]>([
-    {
-      name: "Salary",
-      amount: 200,
-      type: "recurring",
-      dateReceived: new Date(Date.now()),
-    },
-  ]);
+  const [arr, setArr] = useState<ArrProps[]>([]);
   const [isUpdate, setIsUpdate] = useState(false);
-  const [itemId, setItemId] = useState<number>();
+  const [itemId, setItemId] = useState<string>();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -99,43 +117,82 @@ export default function Income() {
     },
   });
 
+  const updateForm = useForm<z.infer<typeof updateFormSchema>>({
+    resolver: zodResolver(updateFormSchema),
+    defaultValues: {
+      name: "",
+    },
+  });
+
   const optionArr = [
     { label: "One time", value: "one_time" },
     { label: "Recurring", value: "recurring" },
   ];
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    setDialogTrigger(false);
+  const getInitialData = async () => {
+    try {
+      const data = await axios.get(`/api/income?userId=${user?.id}`);
 
-    // @ts-ignore
-    setArr(() => {
-      // setTotal(arr.reduce((acc, item) => acc + item.amount, 0));
-      return [...arr, values];
-    });
-
-    setTimeout(() => {
-      form.setValue("amount", 0);
-      form.setValue("dateReceived", null);
-      form.setValue("name", "");
-      form.setValue("type", "");
-    }, 1000);
-
-    // Do some function, then setValue for all to "" or undefined
-  }
-
-  function onUpdate(values: z.infer<typeof formSchema>) {
-    setIsUpdate(false);
-    if (itemId !== undefined) {
-      let updatedArr = [...arr];
-      updatedArr[itemId] = { ...updatedArr[itemId], ...values };
-
-      setArr(() => {
-        // setTotal(arr.reduce((acc, item) => acc + item.amount, 0));
-        return updatedArr;
-      });
+      setArr(data.data.data.income);
+    } catch (error) {
+      toast(`${error}`);
     }
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setDialogTrigger(false);
+    try {
+      await axios.post("/api/income", {
+        ...values,
+        userId: user?.id,
+      });
+      toast("Income source added successfully 🎉");
+      getInitialData();
+    } catch (error) {
+      toast(`${error}`);
+    }
+    form.setValue("amount", 0);
+    form.setValue("createdAt", null);
+    form.setValue("name", "");
+    form.setValue("type", "");
   }
+
+  async function onUpdate(values: z.infer<typeof updateFormSchema>) {
+    setDialogTrigger(false);
+
+    setDialogTrigger(false);
+    setIsUpdate(false);
+    try {
+      await axios.put("/api/income", {
+        ...values,
+        userId: user?.id,
+        id: itemId,
+      });
+
+      toast("Income source has been updated successfully 🎉");
+      getInitialData();
+    } catch (error) {
+      toast(`${error}`);
+    }
+    setItemId("");
+    updateForm.setValue("name", "");
+  }
+
+  async function onDelete(id: string) {
+    try {
+      await axios.delete(`/api/income?id=${id}`);
+      toast("Income source has been deleted sucessfully 🎉");
+      getInitialData();
+    } catch (error) {
+      toast(`${error}`);
+    }
+  }
+
+  useEffect(() => {
+    if (user) {
+      getInitialData();
+    }
+  }, [user]);
 
   return (
     <>
@@ -144,127 +201,164 @@ export default function Income() {
           <DialogHeader>
             <DialogTitle>Enter your income details.</DialogTitle>
           </DialogHeader>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(!isUpdate ? onSubmit : onUpdate)}
-              className="space-y-4"
-            >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Income</FormLabel>
-                    <FormControl>
-                      <Input placeholder="monthly salary..." {...field} />
-                    </FormControl>
-
-                    <FormDescription>
-                      This is your public display income.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem className={cn("mt-0")}>
-                    <FormLabel>Amount</FormLabel>
-                    <FormControl>
-                      <Input placeholder="40000..." {...field} type="number" />
-                    </FormControl>
-                    <FormDescription>
-                      This is your public display amount.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Income type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+          {isUpdate ? (
+            <Form {...updateForm}>
+              <form
+                onSubmit={updateForm.handleSubmit(onUpdate)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={updateForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Income</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select the type of your income" />
-                        </SelectTrigger>
+                        <Input placeholder="monthly salary..." {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {optionArr.map((data, i) => {
-                          return (
-                            <SelectItem value={data.value} key={i}>
-                              {data.label}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      This is your public display amount type.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="dateReceived"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Date received</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(`${field.value}`, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={
-                            field.value !== null
-                              ? field.value
-                              : new Date(Date.now())
-                          }
-                          onSelect={field.onChange}
-                          // disabled={(date) =>
-                          //   date > new Date() || date < new Date("1900-01-01")
-                          // }
-                          initialFocus
+
+                      <FormDescription>
+                        This is your public display income.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit">Update</Button>
+              </form>
+            </Form>
+          ) : (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Income</FormLabel>
+                      <FormControl>
+                        <Input placeholder="monthly salary..." {...field} />
+                      </FormControl>
+
+                      <FormDescription>
+                        This is your public display income.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem className={cn("mt-0")}>
+                      <FormLabel>Amount</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="40000..."
+                          {...field}
+                          type="number"
                         />
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>
-                      Your date of birth is used to calculate your age.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">{!isUpdate ? "Submit" : "Update"}</Button>
-            </form>
-          </Form>
+                      </FormControl>
+                      <FormDescription>
+                        This is your public display amount.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Income type</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select the type of your income" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {optionArr.map((data, i) => {
+                            return (
+                              <SelectItem value={data.value} key={i}>
+                                {data.label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        This is your public display amount type.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="createdAt"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Created at</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(`${field.value}`, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={
+                              field.value !== null
+                                ? field.value
+                                : new Date(Date.now())
+                            }
+                            onSelect={field.onChange}
+                            // disabled={(date) =>
+                            //   date > new Date() || date < new Date("1900-01-01")
+                            // }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormDescription>
+                        Your date of birth is used to calculate your age.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit">Submit</Button>
+              </form>
+            </Form>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -314,7 +408,7 @@ export default function Income() {
               <TableBody>
                 {arr.map((data, i) => {
                   const date = new Date(
-                    data.dateReceived !== null ? data.dateReceived : Date.now()
+                    data.createdAt !== null ? data.createdAt : Date.now()
                   );
                   return (
                     <TableRow key={i}>
@@ -349,31 +443,29 @@ export default function Income() {
                           <DropdownMenuContent className="mr-14">
                             <DropdownMenuLabel>My Account</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>View Income</DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                router.push(`/dashboard/income/${data?.id}`);
+                              }}
+                            >
+                              View Income
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
                                 setDialogTrigger(true);
                                 setIsUpdate(true);
-                                form.setValue("name", data.name);
-                                form.setValue("amount", data.amount);
-                                form.setValue("type", data.type);
-                                form.setValue(
-                                  "dateReceived",
-                                  data.dateReceived
-                                );
-                                setItemId(i);
+                                updateForm.setValue("name", data.name);
+                                setItemId(data.id);
                               }}
                             >
-                              Update Income
+                              Update income
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
-                                setArr(
-                                  arr.filter((val) => val.name !== data.name)
-                                );
+                                onDelete(data.id);
                               }}
                             >
-                              Delete Income
+                              Delete income
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

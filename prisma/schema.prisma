@@ -42,7 +42,7 @@ model NewIncome {
   id        String   @id @default(uuid())
   amount    Int
   createdAt DateTime @default(now())
-  income    Income?  @relation(fields: [incomeId], references: [id])
+  income    Income?  @relation(fields: [incomeId], references: [id], onDelete: Cascade)
   incomeId  String?
 }
 
@@ -61,6 +61,6 @@ model NewExpense {
   id        String   @id @default(uuid())
   amount    Int
   createdAt DateTime @default(now())
-  expense   Expense? @relation(fields: [expenseId], references: [id])
+  expense   Expense? @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   expenseId String?
 }
