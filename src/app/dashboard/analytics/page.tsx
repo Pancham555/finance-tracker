@@ -68,15 +68,75 @@ export default function Analytics() {
           netWorth={`${data.netWorth}`}
         />
       </div>
-      <div className="lg:hidden">
-        <LineChartComponent />
-      </div>
-      <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
-        <div className="hidden lg:block">
-          <LineChartComponent />
+      <div className="space-y-2 mt-5">
+        <div className="text-2xl font-semibold">Your Income sources</div>
+        <div className="grid gap-4 lg:grid-cols-3 md:grid-cols-2">
+          {data.income.map((data, i) => {
+            const date = new Date(
+              data.createdAt !== null ? data.createdAt : Date.now()
+            );
+            const dateString =
+              date.toLocaleDateString("default", {
+                weekday: "short",
+              }) +
+              " " +
+              date.toLocaleDateString("default", {
+                day: "2-digit",
+              }) +
+              " " +
+              date.toLocaleDateString("default", {
+                month: "short",
+              }) +
+              " " +
+              date.toLocaleDateString("default", {
+                year: "2-digit",
+              });
+            return (
+              <LineChartComponent
+                key={i}
+                chartTitle={`Line chart of ${data.name}`}
+                chartDesc={`Last income on ${dateString}`}
+                chartData={data.new_income}
+                lineTitle={data.name}
+              />
+            );
+          })}
         </div>
-        <LineChartComponent />
-        <LineChartComponent />
+      </div>
+      <div className="space-y-2 mt-5">
+        <div className="text-2xl font-semibold">Your expenses</div>
+        <div className="grid gap-4 lg:grid-cols-3 md:grid-cols-2">
+          {data.expenses.map((data, i) => {
+            const date = new Date(
+              data.createdAt !== null ? data.createdAt : Date.now()
+            );
+            const dateString =
+              date.toLocaleDateString("default", {
+                weekday: "short",
+              }) +
+              " " +
+              date.toLocaleDateString("default", {
+                day: "2-digit",
+              }) +
+              " " +
+              date.toLocaleDateString("default", {
+                month: "short",
+              }) +
+              " " +
+              date.toLocaleDateString("default", {
+                year: "2-digit",
+              });
+            return (
+              <LineChartComponent
+                key={i}
+                chartTitle={`Line chart of ${data.name}`}
+                chartDesc={`Last expense on ${dateString}`}
+                chartData={data.new_expense}
+                lineTitle={data.name}
+              />
+            );
+          })}
+        </div>
       </div>
     </main>
   );
