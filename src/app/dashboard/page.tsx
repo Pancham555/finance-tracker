@@ -215,7 +215,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
-            <div className="grid gap-4 md:gap-8 md:grid-cols-2">
+            <div className="grid gap-4 md:gap-8 md:grid-cols-2 grid-cols-1">
               <IncomeBarChartComponent
                 chartData={data.income}
                 chartTitle="Income Bar Chart"

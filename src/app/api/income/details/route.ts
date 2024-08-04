@@ -6,12 +6,15 @@ const prisma = new PrismaClient();
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id") ?? undefined;
-  const data = await prisma.income.findUnique({
+  const income = await prisma.income.findUnique({
     where: { id },
-    include: { new_income: true },
+  });
+  const data = await prisma.newIncome.findMany({
+    where: { incomeId: id },
+    orderBy: [{ createdAt: "asc" }],
   });
 
-  return NextResponse.json({ data });
+  return NextResponse.json({ data: { ...income, new_income: data } });
 }
 
 export async function POST(req: NextRequest) {

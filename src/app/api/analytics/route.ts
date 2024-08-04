@@ -28,16 +28,17 @@ export async function GET(req: NextRequest) {
       where: {
         userId: findUserId?.id,
       },
-      include: { new_income: true },
+      include: { new_income: { orderBy: { createdAt: "asc" } } },
       orderBy: [{ createdAt: "asc" }],
     });
     const expenses = await prisma.expense.findMany({
       where: {
         userId: findUserId?.id,
       },
-      include: { new_expense: true },
+      include: { new_expense: { orderBy: { createdAt: "asc" } } },
       orderBy: [{ createdAt: "asc" }],
     });
+
     return NextResponse.json({
       totalIncome: totalIncome._sum.amount,
       totalExpenses: totalExpenses._sum.amount,

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { TrendingUp } from "lucide-react";
 import { Label, Pie, PieChart } from "recharts";
 
 import {
@@ -23,36 +22,40 @@ interface PieChartProps {
   chartTitle?: string;
   chartDesc?: string;
   netWorth?: string;
-  totalIncome: number;
-  totalExpenses: number;
+  chartData: { type: "one_time" | "recurring"; amount: number; fill: string }[];
+  bottomDesc1?: string;
+  bottomDesc2?: string;
 }
 
-export function PieChartComponent({
+export function PieChartForTypeComponent({
   chartTitle = "Pie Chart - Donut with Text",
   chartDesc = "January - June 2024",
   netWorth = "",
-  totalIncome = 0,
-  totalExpenses = 0,
-}: PieChartProps) {
-  const chartData = [
-    { type: "income", amount: totalIncome, fill: "var(--color-income)" },
+  chartData = [
     {
-      type: "expense",
-      amount: totalExpenses,
-      fill: "var(--color-expense)",
+      type: "one_time",
+      amount: 500,
+      fill: "var(--color-one_time)",
     },
-  ];
-
+    {
+      type: "recurring",
+      amount: 500,
+      fill: "var(--color-recurring)",
+    },
+  ],
+  bottomDesc1 = "Trending up by 5.2% this month",
+  bottomDesc2 = "Showing total visitors for the last 6 months",
+}: PieChartProps) {
   const chartConfig = {
     visitors: {
       label: "Net Worth",
     },
-    income: {
-      label: "Income",
+    one_time: {
+      label: "One Time",
       color: "hsl(var(--chart-1))",
     },
-    expense: {
-      label: "Expense",
+    recurring: {
+      label: "Recurring",
       color: "hsl(var(--chart-2))",
     },
   } satisfies ChartConfig;
@@ -102,7 +105,7 @@ export function PieChartComponent({
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Net Worth
+                          Worth
                         </tspan>
                       </text>
                     );
@@ -115,11 +118,9 @@ export function PieChartComponent({
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          {bottomDesc1}
         </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
+        <div className="leading-none text-muted-foreground">{bottomDesc2}</div>
       </CardFooter>
     </Card>
   );
