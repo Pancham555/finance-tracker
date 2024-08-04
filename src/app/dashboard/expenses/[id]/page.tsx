@@ -56,7 +56,7 @@ interface detailProps {
   amount: number;
   type: "one_time" | "recurring";
   createdAt: Date;
-  new_income: {
+  new_expense: {
     id: string;
     amount: number;
     createdAt: Date;
@@ -91,7 +91,7 @@ export default function Details() {
 
   const getInitialData = async () => {
     try {
-      const data = await axios.get(`/api/income/details?id=${params.id}`);
+      const data = await axios.get(`/api/expenses/details?id=${params.id}`);
 
       setArr(data.data.data);
     } catch (error) {
@@ -102,11 +102,11 @@ export default function Details() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setDialogTrigger(false);
     try {
-      await axios.post("/api/income/details", {
+      await axios.post("/api/expenses/details", {
         id: arr?.id,
         ...values,
       });
-      toast("New Income added successfully 🎉");
+      toast("New Expense added successfully 🎉");
       getInitialData();
     } catch (error) {
       toast(`${error}`);
@@ -119,12 +119,12 @@ export default function Details() {
     setIsUpdate(false);
     setDialogTrigger(false);
     try {
-      await axios.put("/api/income/details", {
+      await axios.put("/api/expenses/details", {
         id: arr?.id,
-        new_income_id: updateId,
+        new_expense_id: updateId,
         ...values,
       });
-      toast("New Income has been updated successfully 🎉");
+      toast("New Expense has been updated successfully 🎉");
       getInitialData();
     } catch (error) {
       toast(`${error}`);
@@ -134,12 +134,12 @@ export default function Details() {
     setUpdateId("");
   }
 
-  async function onDelete(id: string, new_income_id: string) {
+  async function onDelete(id: string, new_expense_id: string) {
     try {
       await axios.delete(
-        `/api/income/details?id=${id}&new_income_id=${new_income_id}`
+        `/api/expenses/details?id=${id}&new_expense_id=${new_expense_id}`
       );
-      toast("Income has been deleted sucessfully 🎉");
+      toast("Expense has been deleted sucessfully 🎉");
       getInitialData();
     } catch (error) {
       toast(`${error}`);
@@ -164,7 +164,7 @@ export default function Details() {
       <Dialog open={dialogTrigger} onOpenChange={setDialogTrigger}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Enter your income details.</DialogTitle>
+            <DialogTitle>Enter your expense details.</DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form
@@ -246,13 +246,13 @@ export default function Details() {
           <div className="grid grid-cols-1 gap-4">
             <h1 className="text-lg font-semibold md:text-2xl">{arr.name}</h1>
             <div className="flex items-center gap-2">
-              <span className="font-medium">Income Type:</span>
+              <span className="font-medium">Expense Type:</span>
               <span>{arr.type === "recurring" ? "Recurring" : "One Time"}</span>
             </div>
           </div>
           <div className="">
             <Button onClick={() => setDialogTrigger(true)}>
-              Add your recent income
+              Add your recent expense
             </Button>
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function Details() {
             </TableHeader>
 
             <TableBody>
-              {arr.new_income.map((data, i) => {
+              {arr.new_expense.map((data, i) => {
                 const date = new Date(
                   data.createdAt !== null ? data.createdAt : Date.now()
                 );
@@ -308,14 +308,14 @@ export default function Details() {
                               );
                             }}
                           >
-                            Update Income
+                            Update Expense
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
                               onDelete(arr.id, data.id);
                             }}
                           >
-                            Delete Income
+                            Delete Expense
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -328,7 +328,7 @@ export default function Details() {
               <TableRow className="bg-white hover:bg-white dark:bg-slate-950 dark:hover:bg-slate-950">
                 <TableCell colSpan={1}>Total</TableCell>
                 <TableCell className="text-right">
-                  ${arr.new_income.reduce((acc, item) => acc + item.amount, 0)}
+                  ${arr.new_expense.reduce((acc, item) => acc + item.amount, 0)}
                 </TableCell>
               </TableRow>
             </TableFooter>
