@@ -168,9 +168,9 @@ export default function Dashboard() {
                     Active Now
                   </CardTitle>
                   {data.incomeDirection.direction === "up" ? (
-                    <TrendingUp className="h-4 w-4 text-muted-foreground text-green-500" />
+                    <TrendingUp className="h-4 w-4  text-green-500" />
                   ) : (
-                    <TrendingDown className="h-4 w-4 text-muted-foreground text-red-500" />
+                    <TrendingDown className="h-4 w-4  text-red-500" />
                   )}
                 </CardHeader>
                 <CardContent>

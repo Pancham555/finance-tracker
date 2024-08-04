@@ -478,7 +478,7 @@ export default function Income() {
                 <TableRow className="bg-white hover:bg-white dark:bg-slate-950 dark:hover:bg-slate-950">
                   <TableCell colSpan={3}>Total</TableCell>
                   <TableCell className="text-right">
-                    ${arr.reduce((acc, item) => acc + item.amount, 0)}
+                    ₹{arr.reduce((acc, item) => acc + item.amount, 0)}
                   </TableCell>
                 </TableRow>
               </TableFooter>

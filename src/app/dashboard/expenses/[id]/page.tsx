@@ -328,7 +328,7 @@ export default function Details() {
               <TableRow className="bg-white hover:bg-white dark:bg-slate-950 dark:hover:bg-slate-950">
                 <TableCell colSpan={1}>Total</TableCell>
                 <TableCell className="text-right">
-                  ${arr.new_expense.reduce((acc, item) => acc + item.amount, 0)}
+                  ₹{arr.new_expense.reduce((acc, item) => acc + item.amount, 0)}
                 </TableCell>
               </TableRow>
             </TableFooter>
