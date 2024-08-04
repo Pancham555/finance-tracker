@@ -1,8 +1,15 @@
 "use client";
 import { IncomeBarChartComponent } from "./components/charts/bar-chart";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ArrowUpRight,
   ChartNoAxesCombined,
   Download,
   HandCoins,
@@ -18,6 +25,15 @@ import axios from "axios";
 import { toast } from "sonner";
 import { DateRange } from "react-day-picker";
 import { addDays } from "date-fns";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface DataProps {
   netWorth: number;
@@ -48,20 +64,29 @@ interface DataProps {
   }[];
 }
 
+/*
+`${new Date().getFullYear()}-${new Date()
+        .getMonth()
+        .toString()
+        .padStart(2, "0")}-01`
+*/
+
 export default function Dashboard() {
   const { user } = useUser();
   const [data, setData] = useState<DataProps>();
   const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(`${new Date().getFullYear()}-01-01`),
+    from: new Date(),
     to: addDays(new Date(), 20),
   });
 
   const getInitialData = async () => {
     try {
-      const values = await axios.get(
-        `/api/dashboard?id=${user?.id}&date_range=${JSON.stringify(date)}`
-      );
-      setData(values.data);
+      if (date?.from && date.to) {
+        const values = await axios.get(
+          `/api/dashboard?id=${user?.id}&date_range=${JSON.stringify(date)}`
+        );
+        setData(values.data);
+      }
     } catch (error) {
       toast(`${error}`);
     }
@@ -190,64 +215,76 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
-            <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-              <div className="xl:col-span-2">
-                <IncomeBarChartComponent
-                  chartData={data.income}
-                  chartTitle="Income Bar Chart"
-                  chartDateRange={`For the last ${data.income.length} incomes`}
-                  desc1={`Trending ${data.incomeDirection.direction} by ${
-                    (data.totalIncome / data.incomeDirection.by) * 100
-                  }% this month`}
-                  desc2={`Showing total income for the last ${data.income.length} incomes`}
-                />
-              </div>
-              <Card x-chunk="dashboard-01-chunk-5">
-                <CardHeader>
-                  <CardTitle>Recent Expenses</CardTitle>
+            <div className="grid gap-4 md:gap-8 md:grid-cols-2">
+              <IncomeBarChartComponent
+                chartData={data.income}
+                chartTitle="Income Bar Chart"
+                chartDateRange={`For the last ${data.income.length} incomes`}
+                desc1={`Trending ${data.incomeDirection.direction} by ${
+                  (data.totalIncome / data.incomeDirection.by) * 100
+                }% this month`}
+                desc2={`Showing total income for the last ${data.income.length} incomes`}
+              />
+
+              <Card className="">
+                <CardHeader className="flex flex-row items-center">
+                  <div className="grid gap-2">
+                    <CardTitle>Recent Expenses</CardTitle>
+                    <CardDescription>Recent expenses of yours.</CardDescription>
+                  </div>
+                  <Button asChild size="sm" className="ml-auto gap-1">
+                    <Link href="/dashboard/expenses">
+                      View All
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
                 </CardHeader>
-                <CardContent className="grid gap-8">
-                  {data.recentExpenses.map((data, i) => {
-                    const date = new Date(
-                      data.createdAt !== null ? data.createdAt : Date.now()
-                    );
-                    return (
-                      <div className="grid gap-2" key={i}>
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm font-medium leading-none">
-                            {data.name}
-                          </p>
-                          <p className="text-sm font-medium leading-none">
-                            ₹ {data.amount}
-                          </p>
-                        </div>
-                        <div className="flex justify-between items-center gap-2">
-                          <p className="text-sm text-muted-foreground">
-                            {date.toLocaleDateString("default", {
-                              weekday: "short",
-                            })}{" "}
-                            {date.toLocaleDateString("default", {
-                              day: "2-digit",
-                            })}{" "}
-                            {date.toLocaleDateString("default", {
-                              month: "short",
-                            })}{" "}
-                            {date.toLocaleDateString("default", {
-                              year: "2-digit",
-                            })}
-                          </p>
-                          <div className="flex justify-end gap-2 items-center">
-                            <span>Type:</span>
-                            <p className="text-sm text-muted-foreground">
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[25%]">Date</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="text-right">Type</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data.recentExpenses.map((data, i) => {
+                        const date = new Date(
+                          data.createdAt !== null ? data.createdAt : Date.now()
+                        );
+                        return (
+                          <TableRow key={i}>
+                            <TableCell>
+                              {" "}
+                              {date.toLocaleDateString("default", {
+                                weekday: "short",
+                              })}{" "}
+                              {date.toLocaleDateString("default", {
+                                day: "2-digit",
+                              })}{" "}
+                              {date.toLocaleDateString("default", {
+                                month: "short",
+                              })}{" "}
+                              {date.toLocaleDateString("default", {
+                                year: "2-digit",
+                              })}
+                            </TableCell>
+                            <TableCell>{data.name}</TableCell>
+                            <TableCell className="text-right">
                               {data.type === "one_time"
-                                ? "One time"
+                                ? "One Time"
                                 : "Recurring"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              ₹ {data.amount}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 </CardContent>
               </Card>
             </div>
