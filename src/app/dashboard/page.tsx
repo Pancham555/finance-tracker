@@ -70,7 +70,7 @@ export default function Dashboard() {
   const [data, setData] = useState<DataProps>();
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
-    to: addDays(new Date(), 20),
+    to: addDays(new Date(), 30),
   });
 
   const getInitialData = async () => {
