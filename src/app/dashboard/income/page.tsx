@@ -60,6 +60,7 @@ import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
   name: z
@@ -107,6 +108,7 @@ export default function Income() {
   const [arr, setArr] = useState<ArrProps[]>([]);
   const [isUpdate, setIsUpdate] = useState(false);
   const [itemId, setItemId] = useState<string>();
+  const [loaded, setLoaded] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -137,6 +139,7 @@ export default function Income() {
     } catch (error) {
       toast(`${error}`);
     }
+    setLoaded(true);
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -193,7 +196,17 @@ export default function Income() {
       getInitialData();
     }
   }, [user]);
-
+  if (!loaded) {
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <div className="flex flex-wrap justify-between gap-4 items-center">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-10 w-28" />
+        </div>
+        <Skeleton className="w-full h-80" />
+      </div>
+    );
+  }
   return (
     <>
       <Dialog open={dialogTrigger} onOpenChange={setDialogTrigger}>

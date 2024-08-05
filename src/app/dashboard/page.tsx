@@ -20,7 +20,7 @@ import {
 import { DatePickerWithRange } from "./components/date-range-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@clerk/nextjs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { DateRange } from "react-day-picker";
@@ -34,6 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataProps {
   netWorth: number;
@@ -64,13 +65,6 @@ interface DataProps {
   }[];
 }
 
-/*
-`${new Date().getFullYear()}-${new Date()
-        .getMonth()
-        .toString()
-        .padStart(2, "0")}-01`
-*/
-
 export default function Dashboard() {
   const { user } = useUser();
   const [data, setData] = useState<DataProps>();
@@ -85,18 +79,49 @@ export default function Dashboard() {
         const values = await axios.get(
           `/api/dashboard?id=${user?.id}&date_range=${JSON.stringify(date)}`
         );
+
         setData(values.data);
       }
     } catch (error) {
       toast(`${error}`);
     }
   };
+  let ref = useRef<HTMLDivElement>(null);
+  // const DownloadData = async () => {
+  //   try {
+  //     await axios.get("/api/dashboard/download");
+  //   } catch (error) {
+  //     toast(`${error}`);
+  //   }
+  // };
+
   useEffect(() => {
     getInitialData();
   }, [date]);
 
   if (!data) {
-    return <>loading...</>;
+    return (
+      <div className="px-4 md:px-8 pt-6 flex flex-col">
+        <div className="flex-1 space-y-4">
+          <div className="flex flex-wrap items-center justify-between space-y-2">
+            <Skeleton className="h-8 w-56" />
+            <div className="flex flex-wrap gap-2 items-center  justify-between w-full md:w-auto">
+              <Skeleton className="h-10 w-64" />
+
+              <Skeleton className="h-10 w-28" />
+            </div>
+          </div>
+        </div>
+        <div className="space-y-4 py-4 md:py-8">
+          <Skeleton className="h-10 w-72" />
+        </div>
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 md:gap-4">
+          {Array.from({ length: 4 }).map((_, i) => {
+            return <Skeleton className="h-40 w-full rounded-lg" key={i} />;
+          })}
+        </div>
+      </div>
+    );
   }
   return (
     <>
@@ -105,6 +130,7 @@ export default function Dashboard() {
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <div className="flex flex-wrap gap-2 items-center  justify-between w-full md:w-auto">
             <DatePickerWithRange date={date} setDate={setDate} />
+
             <Button size="sm">
               <Download className="mr-2 h-4 w-4" />
               Download

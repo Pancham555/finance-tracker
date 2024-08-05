@@ -153,7 +153,10 @@ export default function Details() {
   if (arr === undefined) {
     return (
       <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-        <Skeleton className="h-8 w-56" />
+        <div className="flex justify-between items-center gap-4 flex-wrap">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-10 w-28" />
+        </div>
         <Skeleton className="h-56 w-full rounded-lg" />
       </main>
     );

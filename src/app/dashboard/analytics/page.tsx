@@ -7,6 +7,7 @@ import { PieChartComponent } from "./components/pie-chart-for-income-expense";
 import { BarChartComponent } from "./components/bar-chart";
 import { LineChartComponent } from "./components/line-chart";
 import { PieChartForTypeComponent } from "./components/pie-chart-for-type";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataProps {
   netWorth: number;
@@ -55,7 +56,17 @@ export default function Analytics() {
   }, []);
 
   if (!data) {
-    return <>loading...</>;
+    return (
+      <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-8 w-72" />
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+          <Skeleton className="h-72 w-full" />
+          <Skeleton className="h-72 w-full" />
+          <Skeleton className="h-72 w-full" />
+        </div>
+      </div>
+    );
   }
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
