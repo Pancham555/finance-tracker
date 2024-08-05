@@ -103,8 +103,10 @@ export default function Dashboard() {
   // };
 
   useEffect(() => {
-    getInitialData();
-  }, [date]);
+    if (user) {
+      getInitialData();
+    }
+  }, [date, user]);
 
   if (!data) {
     return (
