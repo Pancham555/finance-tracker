@@ -77,7 +77,14 @@ export default function Dashboard() {
     try {
       if (date?.from && date.to) {
         const values = await axios.get(
-          `/api/dashboard?id=${user?.id}&date_range=${JSON.stringify(date)}`
+          `/api/dashboard?id=${user?.id}&date_range=${JSON.stringify(date)}`,
+          {
+            headers: {
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+              Expires: "0",
+            },
+          }
         );
 
         setData(values.data);
