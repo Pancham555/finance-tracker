@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { clerkClient } from "@clerk/nextjs/server";
 
 const prisma = new PrismaClient();
 
@@ -27,11 +28,15 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const clerkId = searchParams.get("id") ?? undefined;
+  const clerkId = searchParams.get("id");
   console.log("It reached here - delete");
 
-  const data = await prisma.user.delete({
-    where: { clerkId },
-  });
-  return NextResponse.json({ data });
+  if (clerkId) {
+    const data = await prisma.user.delete({
+      where: { clerkId },
+    });
+    await clerkClient.users.deleteUser(clerkId);
+    return NextResponse.json({ data });
+  }
+  return NextResponse.json({ message: "Id not provided!" });
 }
