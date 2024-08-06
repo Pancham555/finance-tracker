@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   if (userId) {
     const data = await prisma.user.findUnique({
       where: { clerkId: userId },
-      include: { expense: true },
+      include: { expense: { orderBy: [{ createdAt: "asc" }] } },
     });
     return NextResponse.json({ data });
   }
